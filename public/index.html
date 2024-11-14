@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Stock API</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="text-center mb-8 bg-slate-800">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome to the Mock Stock API</h1>
+        <p class="text-gray-600 mt-2">Real-time stock price updates</p>
+        <select id="tickerSelect" class="border p-2 mt-4">
+            <option value="">Select a ticker</option>
+            <option value="AAPL">Apple Inc.</option>
+            <option value="GOOGL">Google Inc.</option>
+            <option value="AMZN">Amazon Inc.</option>
+            <option value="TSLA">Tesla Inc.</option>
+            <option value="MSFT">Microsoft Corporation</option>
+            <option value="FB">Facebook Inc.</option>
+            <option value="NFLX">Netflix Inc.</option>
+            <option value="BABA">Alibaba Group</option>
+            <option value="UBER">Uber Technologies Inc.</option>
+            <option value="TWTR">Twitter Inc.</option>
+            <option value="NASDAQ">Couchbase Inc</option>
+        </select>
+    </div>
+
+    <p id="error" class="text-red-500 text-center"></p>
+
+    <div id="stockCard" class="w-full max-w-sm bg-white rounded-lg shadow-md p-6 text-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Stock Information</h2>
+        <div class="grid gap-4 text-left">
+            <div><span class="font-semibold">Ticker:</span> <span id="ticker">-</span></div>
+            <div><span class="font-semibold">Current Price:</span> $<span id="current_price">-</span></div>
+            <div><span class="font-semibold">Open:</span> $<span id="open">-</span></div>
+            <div><span class="font-semibold">High:</span> $<span id="high">-</span></div>
+            <div><span class="font-semibold">Low:</span> $<span id="low">-</span></div>
+            <div><span class="font-semibold">Close:</span> $<span id="close">-</span></div>
+            <div><span class="font-semibold">Previous Close:</span> $<span id="previous_close">-</span></div>
+            <div><span class="font-semibold">Volume:</span> <span id="volume">-</span></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let basePrice;
+
+        // Set base price based on ticker selection
+        function setBasePrice(ticker) {
+            switch (ticker) {
+                case 'AAPL':
+                    basePrice = 150.00;
+                    break;
+                case 'GOOGL':
+                    basePrice = 2800.00;
+                    break;
+                case 'AMZN':
+                    basePrice = 3400.00;
+                    break;
+                case 'NASDAQ':
+                    basePrice = 20.00;
+                    break;
+                default:
+                    basePrice = 0.00;
+                    break;
+            }
+        }
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('stock', (data) => {
+            const tickerElement = document.getElementById('ticker');
+            const currentPriceElement = document.getElementById('current_price');
+            const openElement = document.getElementById('open');
+            const highElement = document.getElementById('high');
+            const lowElement = document.getElementById('low');
+            const closeElement = document.getElementById('close');
+            const previousCloseElement = document.getElementById('previous_close');
+            const volumeElement = document.getElementById('volume');
+
+            tickerElement.textContent = data.ticker;
+            currentPriceElement.textContent = data.current_price;
+            openElement.textContent = data.open;
+            highElement.textContent = data.high;
+            lowElement.textContent = data.low;
+            closeElement.textContent = data.close;
+            previousCloseElement.textContent = data.previous_close;
+            volumeElement.textContent = data.volume.toLocaleString();
+
+            // Apply color coding based on price change
+            function colorCodePrice(priceElement, price) {
+                priceElement.classList.remove('text-green-500', 'text-red-500');
+                priceElement.classList.add(price > basePrice ? 'text-green-500' : 'text-red-500');
+            }
+
+            colorCodePrice(currentPriceElement, data.current_price);
+            colorCodePrice(openElement, data.open);
+            colorCodePrice(highElement, data.high);
+            colorCodePrice(lowElement, data.low);
+            colorCodePrice(closeElement, data.close);
+            colorCodePrice(previousCloseElement, data.previous_close);
+        });
+
+        socket.on('error', (message) => {
+            document.getElementById('error').textContent = message;
+            const stockCard = document.getElementById('stockCard');
+            stockCard.style.display = 'none'; // Hide stock card on error
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+        // Handle ticker selection and request stock data
+        document.getElementById('tickerSelect').addEventListener('change', function () {
+            const selectedTicker = this.value;
+            if (selectedTicker) {
+                setBasePrice(selectedTicker);
+                socket.emit('getStockData', selectedTicker);
+                document.getElementById('error').textContent = ''; // Reset error message
+                document.getElementById('stockCard').style.display = 'block'; // Show stock card
+            }
+            
+        });
+    </script>
+
+</body>
+
+</html>

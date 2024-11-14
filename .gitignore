@@ -1,0 +1,38 @@
+# Node.js dependencies
+/node_modules/
+
+# Environment variables
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS and IDE-specific files
+.DS_Store        # macOS Finder
+Thumbs.db        # Windows Thumbnail Cache
+
+# Build directories (if using bundlers like Webpack, Vite, etc.)
+/dist
+/build
+
+# Test coverage directory
+/coverage
+
+# npm package lock files (optional, only if you don’t want them tracked)
+package-lock.json
+yarn.lock
+
+# Temporary files from your IDE
+/.idea
+.vscode
+
+# Firebase or other platform specific files
+.firebase/
+.vercel/
+
+# Files that store sensitive information
+*.pem
+*.key
+*.crt
