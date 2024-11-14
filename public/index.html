@@ -1,37 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mock Stock API</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="/socket.io/socket.io.js"></script>
 </head>
-
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-
-    <div class="text-center mb-8 bg-slate-800">
+    <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">Welcome to the Mock Stock API</h1>
         <p class="text-gray-600 mt-2">Real-time stock price updates</p>
-        <select id="tickerSelect" class="border p-2 mt-4">
-            <option value="">Select a ticker</option>
-            <option value="AAPL">Apple Inc.</option>
-            <option value="GOOGL">Google Inc.</option>
-            <option value="AMZN">Amazon Inc.</option>
-            <option value="TSLA">Tesla Inc.</option>
-            <option value="MSFT">Microsoft Corporation</option>
-            <option value="FB">Facebook Inc.</option>
-            <option value="NFLX">Netflix Inc.</option>
-            <option value="BABA">Alibaba Group</option>
-            <option value="UBER">Uber Technologies Inc.</option>
-            <option value="TWTR">Twitter Inc.</option>
-            <option value="NASDAQ">Couchbase Inc</option>
-        </select>
     </div>
-
-    <p id="error" class="text-red-500 text-center"></p>
-
     <div id="stockCard" class="w-full max-w-sm bg-white rounded-lg shadow-md p-6 text-gray-700">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Stock Information</h2>
         <div class="grid gap-4 text-left">
@@ -44,93 +23,89 @@
             <div><span class="font-semibold">Previous Close:</span> $<span id="previous_close">-</span></div>
             <div><span class="font-semibold">Volume:</span> <span id="volume">-</span></div>
         </div>
+
+        <!-- Alert functionality -->
+        <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-800">Set Price Alert</h3>
+            <input 
+                type="number" 
+                id="alertPrice" 
+                placeholder="Enter alert price" 
+                class="mt-2 p-2 border rounded w-full"
+            />
+            <button 
+                onclick="setAlert()" 
+                class="mt-2 w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+            >
+                Set Alert
+            </button>
+            <div id="alertMessage" class="mt-4 text-red-500 font-semibold"></div>
+        </div>
     </div>
 
     <script>
-        const socket = io();
-        let basePrice;
+        const ticker = 'AAPL';  // Set default ticker or make dynamic
+        const eventSource = new EventSource(`/api/stockData/${ticker}`);
+        
+        // Event listener for stock data
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateStockInfo(data);
 
-        // Set base price based on ticker selection
-        function setBasePrice(ticker) {
-            switch (ticker) {
-                case 'AAPL':
-                    basePrice = 150.00;
-                    break;
-                case 'GOOGL':
-                    basePrice = 2800.00;
-                    break;
-                case 'AMZN':
-                    basePrice = 3400.00;
-                    break;
-                case 'NASDAQ':
-                    basePrice = 20.00;
-                    break;
-                default:
-                    basePrice = 0.00;
-                    break;
+            // Check alert condition
+            const alertPrice = parseFloat(localStorage.getItem('alertPrice'));
+            if (alertPrice && parseFloat(data.current_price) >= alertPrice) {
+                displayAlertMessage(`Alert! ${ticker} has reached the target price of $${alertPrice}.`);
+                localStorage.removeItem('alertPrice');  // Clear alert once triggered
+            }
+        };
+
+        // Update the DOM with stock data
+        function updateStockInfo(data) {
+            document.getElementById('ticker').textContent = data.ticker;
+            document.getElementById('current_price').textContent = parseFloat(data.current_price).toFixed(2);
+            document.getElementById('open').textContent = parseFloat(data.open).toFixed(2);
+            document.getElementById('high').textContent = parseFloat(data.high).toFixed(2);
+            document.getElementById('low').textContent = parseFloat(data.low).toFixed(2);
+            document.getElementById('close').textContent = parseFloat(data.close).toFixed(2);
+            document.getElementById('previous_close').textContent = parseFloat(data.previous_close).toFixed(2);
+            document.getElementById('volume').textContent = data.volume.toLocaleString();
+        }
+
+        // Set alert price
+        function setAlert() {
+            const alertPrice = parseFloat(document.getElementById('alertPrice').value);
+            if (!isNaN(alertPrice) && alertPrice > 0) {
+                localStorage.setItem('alertPrice', alertPrice);
+                displayAlertMessage(`Alert set for ${ticker} at $${alertPrice}.`);
+                sendAlertToServer(ticker, alertPrice);
+            } else {
+                displayAlertMessage('Please enter a valid alert price.');
             }
         }
 
-        socket.on('connect', () => {
-            console.log('Connected to server');
-        });
+        // Display alert messages
+        function displayAlertMessage(message) {
+            document.getElementById('alertMessage').textContent = message;
+        }
 
-        socket.on('stock', (data) => {
-            const tickerElement = document.getElementById('ticker');
-            const currentPriceElement = document.getElementById('current_price');
-            const openElement = document.getElementById('open');
-            const highElement = document.getElementById('high');
-            const lowElement = document.getElementById('low');
-            const closeElement = document.getElementById('close');
-            const previousCloseElement = document.getElementById('previous_close');
-            const volumeElement = document.getElementById('volume');
+        // Send alert to server
+        function sendAlertToServer(ticker, alertPrice) {
+            fetch('/api/setAlert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ticker, alertPrice })
+            }).then(response => response.json())
+              .then(data => console.log(data.message))
+              .catch(error => console.error('Error setting alert:', error));
+        }
 
-            tickerElement.textContent = data.ticker;
-            currentPriceElement.textContent = data.current_price;
-            openElement.textContent = data.open;
-            highElement.textContent = data.high;
-            lowElement.textContent = data.low;
-            closeElement.textContent = data.close;
-            previousCloseElement.textContent = data.previous_close;
-            volumeElement.textContent = data.volume.toLocaleString();
-
-            // Apply color coding based on price change
-            function colorCodePrice(priceElement, price) {
-                priceElement.classList.remove('text-green-500', 'text-red-500');
-                priceElement.classList.add(price > basePrice ? 'text-green-500' : 'text-red-500');
-            }
-
-            colorCodePrice(currentPriceElement, data.current_price);
-            colorCodePrice(openElement, data.open);
-            colorCodePrice(highElement, data.high);
-            colorCodePrice(lowElement, data.low);
-            colorCodePrice(closeElement, data.close);
-            colorCodePrice(previousCloseElement, data.previous_close);
-        });
-
-        socket.on('error', (message) => {
-            document.getElementById('error').textContent = message;
-            const stockCard = document.getElementById('stockCard');
-            stockCard.style.display = 'none'; // Hide stock card on error
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Disconnected from server');
-        });
-
-        // Handle ticker selection and request stock data
-        document.getElementById('tickerSelect').addEventListener('change', function () {
-            const selectedTicker = this.value;
-            if (selectedTicker) {
-                setBasePrice(selectedTicker);
-                socket.emit('getStockData', selectedTicker);
-                document.getElementById('error').textContent = ''; // Reset error message
-                document.getElementById('stockCard').style.display = 'block'; // Show stock card
-            }
-            
-        });
+        eventSource.onerror = () => {
+            console.error('Error connecting to SSE');
+            eventSource.close();
+        };
     </script>
-
 </body>
-
 </html>
