@@ -43,13 +43,21 @@
         </div>
     </div>
 
+    <!-- Audio element for notification sound -->
+    <audio id="notificationSound" src="/Assets/notify.mp3" preload="auto"></audio>
+
+    <!-- Include socket.io library -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script>
-        const ticker = 'AAPL';  // Set default ticker or make dynamic
-        const eventSource = new EventSource(`/api/stockData/${ticker}`);
-        
-        // Event listener for stock data
-        eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+        const socket = io('http://localhost:3000'); // Connect to the WebSocket server
+        const ticker = 'GOOGL';  // Set default ticker or make dynamic
+        const notificationSound = document.getElementById('notificationSound'); // Get audio element
+
+        // Emit 'getStockData' event to start receiving stock updates
+        socket.emit('getStockData', ticker);
+
+        // Listen for stock data updates
+        socket.on('stock', (data) => {
             updateStockInfo(data);
 
             // Check alert condition
@@ -57,8 +65,11 @@
             if (alertPrice && parseFloat(data.current_price) >= alertPrice) {
                 displayAlertMessage(`Alert! ${ticker} has reached the target price of $${alertPrice}.`);
                 localStorage.removeItem('alertPrice');  // Clear alert once triggered
+
+                // Play notification sound
+                notificationSound.play();
             }
-        };
+        });
 
         // Update the DOM with stock data
         function updateStockInfo(data) {
@@ -91,21 +102,21 @@
 
         // Send alert to server
         function sendAlertToServer(ticker, alertPrice) {
-            fetch('/api/setAlert', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ticker, alertPrice })
-            }).then(response => response.json())
-              .then(data => console.log(data.message))
-              .catch(error => console.error('Error setting alert:', error));
+            socket.emit('setAlert', { ticker, alertPrice });
         }
 
-        eventSource.onerror = () => {
-            console.error('Error connecting to SSE');
-            eventSource.close();
-        };
+        // Listen for alert notification from the server
+        socket.on('alert', (data) => {
+            displayAlertMessage(data.message);
+
+            // Play notification sound when alert is received
+            notificationSound.play();
+        });
+
+        // Handle connection error
+        socket.on('connect_error', (error) => {
+            console.error('Connection error:', error);
+        });
     </script>
 </body>
 </html>

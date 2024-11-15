@@ -3,6 +3,7 @@
 
 # Environment variables
 .env
+app.js
 
 # Logs
 logs
