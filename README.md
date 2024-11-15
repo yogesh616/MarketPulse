@@ -159,11 +159,10 @@ stock (object) with simulated data:
 
 json
 
-Copy code
+
 
 
 {
-
   "ticker": "AAPL",
   "price": 151.45,
   "volume": 1350
