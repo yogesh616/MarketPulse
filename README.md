@@ -30,3 +30,104 @@ Run the server:
 
 node index.js
 The server should start on http://localhost:3000.
+
+API Endpoints
+
+GET /api/tickers
+Description: Returns a list of available stock tickers.
+
+Response:
+
+200 OK
+
+JSON array of available stock tickers:
+
+{
+    "AAPL": {
+        "basePrice": 150
+    },
+    "GOOGL": {
+        "basePrice": 2800
+    },
+    "AMZN": {
+        "basePrice": 3400
+    },
+    "SONY": {
+        "basePrice": 1400
+    },
+    "NASDAQ": {
+        "basePrice": 20
+    },
+    "TSLA": {
+        "basePrice": 350
+    },
+    "MSFT": {
+        "basePrice": 418
+    },
+    "FB": {
+        "basePrice": 586
+    },
+    "NFLX": {
+        "basePrice": 805.44
+    },
+    "BABA": {
+        "basePrice": 95.42
+    },
+    "UBER": {
+        "basePrice": 71.67
+    },
+    "TWTR": {
+        "basePrice": 53.7
+    }
+}
+
+
+GET /api/single?symbol=AAPL
+
+Description: Retrieves historical data for a given stock ticker.
+
+Parameters:
+
+symbol (string): The stock ticker symbol (e.g., "AAPL").
+
+Response:
+
+200 OK
+
+JSON object containing historical data:
+
+{
+    "_id": "6735bb5b0a7822a1e34eeced",
+    "symbol": "AAPL",
+    "data": [
+        {
+            "date": "Nov 13, 2024",
+            "open": 224.01,
+            "high": 226.65,
+            "low": 222.76,
+            "close": 225.12,
+            "adjClose": 225.12,
+            "volume": 48528500
+        },
+        {
+            "date": "Nov 12, 2024",
+            "open": 224.55,
+            "high": 225.59,
+            "low": 223.36,
+            "close": 224.23,
+            "adjClose": 224.23,
+            "volume": 40398300
+        },
+        {
+            "date": "Nov 11, 2024",
+            "open": 225,
+            "high": 225.7,
+            "low": 221.5,
+            "close": 224.23,
+            "adjClose": 224.23,
+            "volume": 42005600
+        },
+
+        ]
+        
+        }
