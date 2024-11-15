@@ -16,11 +16,15 @@ Installation
 Clone the repository:
 
 bash
-Copy code
+
 git clone https://github.com/yogesh616/marketpulse.git
+
 cd marketpulse
+
 Install dependencies
+
 npm install
+
 Run the server:
 
 
