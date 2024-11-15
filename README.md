@@ -27,8 +27,9 @@ npm install
 
 Run the server:
 
+npm run dev
 
-node index.js
+
 The server should start on http://localhost:3000.
 
 API Endpoints
