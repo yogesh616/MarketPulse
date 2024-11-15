@@ -96,38 +96,41 @@ Response:
 
 JSON object containing historical data:
 
-{
-    "_id": "6735bb5b0a7822a1e34eeced",
-    "symbol": "AAPL",
-    "data": [
-        {
-            "date": "Nov 13, 2024",
-            "open": 224.01,
-            "high": 226.65,
-            "low": 222.76,
-            "close": 225.12,
-            "adjClose": 225.12,
-            "volume": 48528500
-        },
-        {
-            "date": "Nov 12, 2024",
-            "open": 224.55,
-            "high": 225.59,
-            "low": 223.36,
-            "close": 224.23,
-            "adjClose": 224.23,
-            "volume": 40398300
-        },
-        {
-            "date": "Nov 11, 2024",
-            "open": 225,
-            "high": 225.7,
-            "low": 221.5,
-            "close": 224.23,
-            "adjClose": 224.23,
-            "volume": 42005600
-        },
 
-        ]
-        
-        }
+
+
+
+
+
+
+
+{
+
+
+    "_id": "6735bb5b0a7822a1e34eeced",
+
+    "symbol": "AAPL",
+
+    "data": [
+
+    {
+
+            "date": "Nov 13, 2024",
+
+            "open": 224.01,
+
+            "high": 226.65,
+
+            "low": 222.76,
+
+            "close": 225.12,
+
+            "adjClose": 225.12,
+
+            "volume": 48528500
+
+    }
+
+         ]
+
+         }
