@@ -138,3 +138,33 @@ JSON object containing historical data:
          ]
 
          }
+
+
+
+Socket.IO Events
+
+Server-Side Events
+
+getStockData
+
+Triggered by: Client
+
+Parameters: ticker (string) - The stock ticker for which data is requested.
+
+Description: Starts sending real-time stock data updates for the specified ticker every second.
+
+Emits:
+
+stock (object) with simulated data:
+
+json
+
+Copy code
+
+
+{
+
+  "ticker": "AAPL",
+  "price": 151.45,
+  "volume": 1350
+}
