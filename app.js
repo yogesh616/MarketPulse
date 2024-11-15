@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 
 const app = express();
 
-mongoose.connect('mongodb+srv://yogeshsaini:7691011987@cluster0.ihj3a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect('mongodb+srv://user:password@cluster0.ihj3a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
   .then(() => console.log('MongoDB connection established'))
   .catch(() => console.log('MongoDB connection aborted'));
 
